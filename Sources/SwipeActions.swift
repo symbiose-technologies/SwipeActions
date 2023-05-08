@@ -464,11 +464,12 @@ public struct SwipeView<Label, LeadingActions, TrailingActions>: View where Labe
             let changed =
                 leadingState == .triggering && newValue == nil ||
                 leadingState == nil && newValue == .triggering
-
+            #if os(iOS)
             if changed, options.enableTriggerHaptics { /// Generate haptic feedback if necessary.
                 let generator = UIImpactFeedbackGenerator(style: .rigid)
                 generator.impactOccurred()
             }
+            #endif
         }
         .onChange(of: trailingState) { [trailingState] newValue in
 
@@ -476,10 +477,12 @@ public struct SwipeView<Label, LeadingActions, TrailingActions>: View where Labe
                 trailingState == .triggering && newValue == nil ||
                 trailingState == nil && newValue == .triggering
 
+            #if os(iOS)
             if changed, options.enableTriggerHaptics {
                 let generator = UIImpactFeedbackGenerator(style: .rigid)
                 generator.impactOccurred()
             }
+            #endif
         }
 
         // MARK: - Receive `SwipeViewGroup` events

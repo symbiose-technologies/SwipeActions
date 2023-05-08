@@ -6,7 +6,8 @@ import PackageDescription
 let package = Package(
     name: "SwipeActions",
     platforms: [
-        .iOS(.v14)
+        .iOS(.v16),
+        .macOS(.v13)
     ],
     products: [
         // Products define the executables and libraries a package produces, and make them visible to other packages.
