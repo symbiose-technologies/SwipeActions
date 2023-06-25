@@ -1270,8 +1270,9 @@ public struct SwipeDeleteModifier: ViewModifier {
             .mask(
                 Color.clear.overlay(
                     SwipeDeleteMaskShape(animatableData: visibility)
-                        .padding(.horizontal, -100), /// Prevent horizontal clipping
-                    alignment: .top
+                        .padding(.horizontal, -100) /// Prevent horizontal clipping
+                        .padding(.vertical, -10), /// Prevent vertical clipping
+                        alignment: .top
                 )
             )
     }
