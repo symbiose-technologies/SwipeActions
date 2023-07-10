@@ -176,6 +176,10 @@ public struct SwipeOptions {
 
     /// Values for controlling the trigger animation.
     var offsetTriggerAnimationStiffness = Double(160), offsetTriggerAnimationDamping = Double(70)
+    
+    var swipeToRightBlocked: Bool = false
+    var swipeToLeftBlocked: Bool = false
+    
 }
 
 // MARK: - Environment
@@ -850,9 +854,36 @@ extension SwipeView {
 }
 
 // MARK: - Gestures
+extension DragGesture.Value {
+    
+    @inlinable
+    func shouldBlockHorizontal(_ swipeToLeftBlocked: Bool, swipeToRightBlocked: Bool) -> Bool {
+        let dx = self.location.x - self.startLocation.x
+        if dx > 0 && swipeToRightBlocked {
+            return true
+        }
+        if dx < 0 && swipeToLeftBlocked {
+            return true
+        }
+        return false
+    }
+    
+    
+}
 
 extension SwipeView {
+    
+
+    func shouldBlockDragGesture(value: DragGesture.Value) -> Bool {
+        return value.shouldBlockHorizontal(self.options.swipeToLeftBlocked,
+                                           swipeToRightBlocked: self.options.swipeToRightBlocked)
+    }
+    
     func onChanged(value: DragGesture.Value) {
+        if currentSide == nil {
+            if self.shouldBlockDragGesture(value: value) { return }
+        }
+        
         /// Back up the value.
         latestDragGestureValueBackup = value
 
@@ -938,6 +969,14 @@ extension SwipeView {
     }
 
     func onEnded(value: DragGesture.Value) {
+        if currentSide == nil {
+            if self.shouldBlockDragGesture(value: value) {
+                print("Blocking swipe gesture onEnded")
+                return
+                
+            }
+        }
+        
         latestDragGestureValueBackup = nil
         let velocity = velocity.dx / currentOffset
         end(value: value, velocity: velocity)
@@ -1068,8 +1107,8 @@ public extension SwipeView where LeadingActions == EmptyView, TrailingActions ==
     }
 }
 
-// MARK: - Convenience modifiers
 
+// MARK: - Convenience modifiers
 public extension SwipeAction {
     /**
      Apply this to the edge action to enable drag-to-trigger.
@@ -1115,6 +1154,26 @@ public extension SwipeAction {
         return view
     }
 }
+
+
+// MARK: Sym Modifications
+public extension SwipeView {
+    
+    func setBlockSwipeToLeft(_ isBlocked: Bool) -> SwipeView {
+        var view = self
+        view.options.swipeToLeftBlocked = isBlocked
+        return view
+    }
+    
+    
+    func setBlockSwipeToRight(_ isBlocked: Bool) -> SwipeView {
+        var view = self
+        view.options.swipeToRightBlocked = isBlocked
+        return view
+    }
+    
+}
+
 
 public extension SwipeView {
     /// If swiping is currently enabled.
