@@ -443,8 +443,14 @@ public struct SwipeView<Label, LeadingActions, TrailingActions>: View where Labe
 
         // MARK: - Add gestures
 
-        .highPriorityGesture( /// Add the drag gesture.
-            DragGesture(minimumDistance: options.swipeMinimumDistance)
+        .simultaneousGesture( /// Add the drag gesture.
+//            .highPriorityGesture( /// Add the drag gesture.
+            DragGesture(
+                minimumDistance: options.swipeMinimumDistance
+//                ,
+//                coordinateSpace: .global
+            
+            )
                 .updating($currentlyDragging) { value, state, transaction in
                     state = true
                 }
@@ -859,12 +865,23 @@ extension DragGesture.Value {
     @inlinable
     func shouldBlockHorizontal(_ swipeToLeftBlocked: Bool, swipeToRightBlocked: Bool) -> Bool {
         let dx = self.location.x - self.startLocation.x
+        print("DragGesture shouldBlock Horiz Distance: \(dx)")
+
         if dx > 0 && swipeToRightBlocked {
             return true
         }
         if dx < 0 && swipeToLeftBlocked {
             return true
         }
+        
+        return false
+    }
+    
+    @inlinable
+    func shouldBlockVert() -> Bool {
+        let dy = self.location.y - self.startLocation.y
+        print("DragGesture shouldBlock Vert Y Distance: \(dy)")
+        
         return false
     }
     
@@ -875,8 +892,12 @@ extension SwipeView {
     
 
     func shouldBlockDragGesture(value: DragGesture.Value) -> Bool {
-        return value.shouldBlockHorizontal(self.options.swipeToLeftBlocked,
-                                           swipeToRightBlocked: self.options.swipeToRightBlocked)
+        let shouldBlockHoriz = value.shouldBlockHorizontal(self.options.swipeToLeftBlocked,
+                                                           swipeToRightBlocked: self.options.swipeToRightBlocked)
+        let shouldBlockVert = value.shouldBlockVert()
+        return shouldBlockHoriz || shouldBlockVert
+        
+        
     }
     
     func onChanged(value: DragGesture.Value) {

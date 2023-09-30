@@ -53,6 +53,38 @@ struct ContentView: View {
         }
     }
 
+    var singleSideTest: some View {
+        
+        VStack {
+            Text("Hello world")
+                .frame(width: 200)
+        }
+        .frame(width: 200, height: 80)
+        .background(
+            Material.ultraThick
+        )
+        .withSingleSideSwipeAction(sideIsLeft: true, actionCb: {
+            print("Left swipe triggered")
+        }, actionBuilder: {
+            singleSideTestActionView
+        })
+        .padding(.horizontal, 16)
+        
+        
+    }
+    
+    
+    var singleSideTestActionView: some View  {
+        Image(systemName: "square.and.arrow.up")
+            .font(.system(size: 24))
+            .foregroundColor(.white)
+            .padding(12)
+            .background(Color.blue)
+            .cornerRadius(12)
+    }
+    
+    
+    
     var content: some View {
         ScrollView {
             VStack(spacing: 12) {
@@ -62,6 +94,8 @@ struct ContentView: View {
                     }
                 }
 
+                singleSideTest
+                
                 DemoSection(expandedSectionKinds: $expandedSectionKinds, kind: .customization) {
                     VStack(spacing: 8) {
                         customization
@@ -139,9 +173,9 @@ struct ContentView: View {
                                     .font(.system(.body, design: .monospaced).weight(.semibold))
                             }
                             .multilineTextAlignment(.center)
-                            .accent(.primary)
-                            .padding(.top, 20)
-                            .transition(.scale(scale: 0.8).combined(with: .opacity))
+//                            .accent(.primary)
+//                            .padding(.top, 20)
+//                            .transition(.scale(scale: 0.8).combined(with: .opacity))
                         }
                     }
                     .frame(maxWidth: .infinity)
