@@ -31,6 +31,23 @@
 
 import SwiftUI
 
+
+public class SwipeActionMgr {
+    public static let shared = SwipeActionMgr()
+    
+    public var anySwipeActive: Bool = false {
+        didSet {
+            print("SwipeActionMgr: anySwipeActive: \(anySwipeActive)")
+        }
+    }
+    
+    public init() {
+        
+    }
+    
+}
+
+
 // MARK: - Structures
 
 /// The swipe gesture's current state.
@@ -407,6 +424,7 @@ public struct SwipeView<Label, LeadingActions, TrailingActions>: View where Labe
         self.leadingActions = leadingActions
         self.trailingActions = trailingActions
     }
+    
 
     public var body: some View {
         HStack {
@@ -442,21 +460,44 @@ public struct SwipeView<Label, LeadingActions, TrailingActions>: View where Labe
         )
 
         // MARK: - Add gestures
-
+//        .gesture(
         .simultaneousGesture( /// Add the drag gesture.
 //            .highPriorityGesture( /// Add the drag gesture.
-            DragGesture(
-                minimumDistance: options.swipeMinimumDistance
-//                ,
-//                coordinateSpace: .global
             
-            )
+//            DragGesture(minimumDistance: options.swipeMinimumDistance)
+//                .sequenced(
+//                    before:
+//                        DragGesture(minimumDistance: options.swipeMinimumDistance)
+//                            .updating($currentlyDragging) { value, state, transaction in
+//                                let shouldSkip = self.shouldBlockDragGesture(value: value)
+//                                print("SwipeActions updating $currentlyDragging shouldSkip: \(shouldSkip)")
+//                                if shouldSkip {
+//                                    state = false
+//                                    return
+//                                }
+//                                state = true
+//                            }
+//                            .onChanged(onChanged)
+//                            .onEnded(onEnded)
+//                            .updatingVelocity($velocity)
+//                
+//                )
+            
+            DragGesture(
+                minimumDistance: options.swipeMinimumDistance)
                 .updating($currentlyDragging) { value, state, transaction in
+//                    let shouldSkip = self.shouldBlockDragGesture(value: value)
+//                    print("SwipeActions updating $currentlyDragging shouldSkip: \(shouldSkip)")
+//                    if shouldSkip {
+//                        state = false
+////                        return
+//                    }
                     state = true
                 }
                 .onChanged(onChanged)
                 .onEnded(onEnded)
-                .updatingVelocity($velocity),
+                .updatingVelocity($velocity)
+            ,
             including: options.swipeEnabled ? .all : .subviews /// Enable/disable swiping here.
         )
         .onChange(of: currentlyDragging) { currentlyDragging in /// Detect gesture cancellations.
@@ -865,7 +906,7 @@ extension DragGesture.Value {
     @inlinable
     func shouldBlockHorizontal(_ swipeToLeftBlocked: Bool, swipeToRightBlocked: Bool) -> Bool {
         let dx = self.location.x - self.startLocation.x
-        print("DragGesture shouldBlock Horiz Distance: \(dx)")
+//        print("DragGesture shouldBlock Horiz Distance: \(dx)")
 
         if dx > 0 && swipeToRightBlocked {
             return true
@@ -880,8 +921,7 @@ extension DragGesture.Value {
     @inlinable
     func shouldBlockVert() -> Bool {
         let dy = self.location.y - self.startLocation.y
-        print("DragGesture shouldBlock Vert Y Distance: \(dy)")
-        
+//        print("DragGesture shouldBlock Vert Y Distance: \(dy)")
         return false
     }
     
@@ -891,6 +931,7 @@ extension DragGesture.Value {
 extension SwipeView {
     
 
+    
     func shouldBlockDragGesture(value: DragGesture.Value) -> Bool {
         let shouldBlockHoriz = value.shouldBlockHorizontal(self.options.swipeToLeftBlocked,
                                                            swipeToRightBlocked: self.options.swipeToRightBlocked)
@@ -903,6 +944,10 @@ extension SwipeView {
     func onChanged(value: DragGesture.Value) {
         if currentSide == nil {
             if self.shouldBlockDragGesture(value: value) { return }
+//            if self.shouldBlockDragGesture(value: value) {
+//                latestDragGestureValueBackup = nil
+//                return
+//            }
         }
         
         /// Back up the value.
@@ -910,6 +955,8 @@ extension SwipeView {
 
         /// Set the current side.
         if currentSide == nil {
+
+            
             let dx = value.location.x - value.startLocation.x
             if dx > 0 {
                 currentSide = .leading
@@ -994,7 +1041,6 @@ extension SwipeView {
             if self.shouldBlockDragGesture(value: value) {
                 print("Blocking swipe gesture onEnded")
                 return
-                
             }
         }
         
@@ -1148,7 +1194,7 @@ public extension SwipeAction {
                  .allowSwipeToTrigger()
          }
      */
-    func allowSwipeToTrigger(_ value: Bool = true) -> some View {
+    func allowSwipeToTrigger(_ value: Bool = true) -> SwipeAction {
         var view = self
         view.allowSwipeToTrigger = value
         return view
@@ -1493,6 +1539,12 @@ extension View {
                         }
                     }
             }
+//                .onPreferenceChange(ContentSizeReaderPreferenceKey.self) { newValue in
+//                    size(newValue)
+////                    DispatchQueue.main.async {
+////                        size(newValue)
+////                    }
+//                }
             .hidden()
         )
     }
